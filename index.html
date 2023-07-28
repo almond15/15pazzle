@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>25 パズル</title>
+
+  <style>
+    .container {
+      width: 450px; /* Adjusted width for 5x5 grid */
+      height: 450px; /* Adjusted height for 5x5 grid */
+      border: 1px solid red;
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .item {
+      width: 90px;
+      height: 90px;
+      line-height: 90px;
+      border: 1px solid blue;
+      box-sizing: border-box;
+      background-color: aliceblue;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    /* Additional styles for 5x5 grid */
+    .item.piece-17,
+    .item.piece-18,
+    .item.piece-19,
+    .item.piece-20,
+    .item.piece-21,
+    .item.piece-22,
+    .item.piece-23,
+    .item.piece-24,
+    .item.piece-25 {
+      order: 17; /* Set order for new pieces */
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="item piece-1">1</div>
+    <div class="item piece-2">2</div>
+    <div class="item piece-3">3</div>
+    <div class="item piece-4">4</div>
+    <div class="item piece-5">5</div>
+    <div class="item piece-6">6</div>
+    <div class="item piece-7">7</div>
+    <div class="item piece-8">8</div>
+    <div class="item piece-9">9</div>
+    <div class="item piece-10">10</div>
+    <div class="item piece-11">11</div>
+    <div class="item piece-12">12</div>
+    <div class="item piece-13">13</div>
+    <div class="item piece-14">14</div>
+    <div class="item piece-15">15</div>
+    <div class="item piece-16">16</div>
+    <div class="item piece-17">17</div> <!-- New piece -->
+    <div class="item piece-18">18</div> <!-- New piece -->
+    <div class="item piece-19">19</div> <!-- New piece -->
+    <div class="item piece-20">20</div> <!-- New piece -->
+    <div class="item piece-21">21</div> <!-- New piece -->
+    <div class="item piece-22">22</div> <!-- New piece -->
+    <div class="item piece-23">23</div> <!-- New piece -->
+    <div class="item piece-24">24</div> <!-- New piece -->
+    <div class="item piece-25"></div> <!-- Empty space -->
+  </div>
+
+  <!-- Move count display -->
+  <div id="moveCount">Move Count: 0</div>
+
+  <script>
+    // [Model] "ピースの順番を管理する配列" を用意する
+    var ordersModel = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+
+    // [Model] 空白ピース基準で、移動が許されるピースの order を格納する
+    var movableOrdersModel = [21, 24, 16, 20];
+
+    // Function to check if two pieces are adjacent
+    function areAdjacent(piece1, piece2) {
+      const diff = Math.abs(piece1 - piece2);
+      return (diff === 1 && Math.floor((piece1 - 1) / 5) === Math.floor((piece2 - 1) / 5)) ||
+             (diff === 5);
+    }
+
+    // Move count variable
+    var count = 0;
+
+    // Model → View への反映部分を作成する (そのような処理を通称 "コンポーネント" と呼ぶ)
+    function component() {
+      var views = document.querySelectorAll(".item");
+
+      for (var index = 0; index < 25; index = index + 1) {
+        views[index].style.order = ordersModel[index];
+      }
+
+      // Display the move count on the HTML
+      var moveCountElement = document.getElementById("moveCount");
+      moveCountElement.textContent = "Move Count: " + count;
+    }
+
+    function shufflePieces() {
+      ordersModel = _.shuffle(ordersModel);
+      count = 0; // Reset move count after shuffling
+    }
+
+    // Function to find adjacent pieces of the empty space
+    function findAdjacentOfEmpty() {
+      var emptyOrder = ordersModel[24];
+
+      movableOrdersModel = [
+        emptyOrder - 5,
+        emptyOrder + 5,
+      ];
+
+      if (emptyOrder > 5) {
+        movableOrdersModel.push(emptyOrder - 5);
+      }
+
+      if (emptyOrder <= 20) {
+        movableOrdersModel.push(emptyOrder + 5);
+      }
+
+      if ((emptyOrder - 1) % 5 !== 0) {
+        movableOrdersModel.push(emptyOrder - 1);
+      }
+
+      if (emptyOrder % 5 !== 0) {
+        movableOrdersModel.push(emptyOrder + 1);
+      }
+    }
+
+    function onTapped(event) {
+      findAdjacentOfEmpty();
+
+      const tappedOrder = Number(event.target.style.order);
+      const tappedPiece = Number(event.target.innerHTML) - 1;
+
+      if (movableOrdersModel.includes(tappedOrder)) {
+        const temp = ordersModel[24];
+        ordersModel[24] = tappedOrder;
+        ordersModel[tappedPiece] = temp;
+
+        count++; // Increase move count by 1
+
+        component();
+      }
+
+      if (
+        String(ordersModel) ===
+        "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25"
+      ) {
+        setTimeout(() => alert("クリア！"), 0);
+      }
+    }
+
+    function initializeTapOperations() {
+      var elements = document.querySelectorAll(".item");
+
+      for (var elem of elements) {
+        elem.addEventListener("click", onTapped);
+      }
+    }
+
+    initializeTapOperations();
+    shufflePieces();
+    component();
+  </script>
+</body>
+
+</html>
